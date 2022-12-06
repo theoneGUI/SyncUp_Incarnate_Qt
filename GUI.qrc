@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/GUI">
+        <file>resources/SyncUp.png</file>
+    </qresource>
+</RCC>
