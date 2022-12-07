@@ -52,7 +52,7 @@ GUI::GUI(QWidget *parent) : QMainWindow(parent)
 
     if (!filesystem::exists(filesystem::path(configPath))) {
         filesystem::create_directory(configPath);
-        vector<pair<string, string>> vectorOfPairs{ {pair("scan", paths::USERPROFILE+"\\Desktop\\")}, pair("store", paths::TMP + "\\SU_Hashes.dat")};
+        vector<pair<string, string>> vectorOfPairs{ {pair("scan", paths::USERPROFILE+"\\Desktop\\")}, pair("store", paths::SYNCUP_DATA_DIR + "\\SU_Hashes.dat")};
         writeConfigFile(vectorOfPairs, configWriter::DEFAULT_PATH, configWriter::OVERWRITE);
     }
     refreshConfig();
