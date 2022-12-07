@@ -17,12 +17,12 @@
 #include <memory>
 #include <stdexcept>
 #include <utility>
+#include "../commons.h"
 #include <QThread>
 
 #define MAX_MESSAGE_LENGTH 8192
 #define SERVER_PORT 4444
 
-using std::cout;
 using std::pair;
 using std::endl;
 
@@ -65,20 +65,22 @@ namespace suftp {
 			this->portToBindTo = portToBindTo;
 			this->rootDirectory = rootDirectory;
 			this->filenames = filenames;
-			p_libsys_init();
 			isRunning = false;
 		}
 		~SUFTPSender() {
-			p_libsys_shutdown();
 		}
 		void run() override {
 			if (isRunning)
 				return;
+			logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "suftp_send.log", std::ios::app);
 			isRunning = true;
+			p_libsys_init();
 			int code = privateRun(this->interfaceToBindTo, this->portToBindTo, this->rootDirectory, this->filenames);
+			p_libsys_shutdown();
 			isRunning = false;
 		}
-
+	private:
+		std::ofstream logfile;
 	protected:
 		bool isRunning;
 		int privateRun(std::string interfaceToBindTo, int portToBindTo, std::string rootDirectory, std::vector<std::string> filenames) {
@@ -237,7 +239,7 @@ namespace suftp {
 		std::string rootDirectory;
 		std::vector<std::string> filenames;
 
-	public slots:
+	signals:
 		void incrementFilesTransferred(int f);
 		void transferDone();
 		void transferFailed(int code);
@@ -251,20 +253,24 @@ namespace suftp {
 			this->interfaceToBindTo = interfaceToBindTo;
 			this->portToBindTo = portToBindTo;
 			this->rootDirectory = rootDirectory;
-			p_libsys_init();
 			isRunning = false;
 		}
 		~SUFTPReceiver() {
-			p_libsys_shutdown();
 		}
 
 		void run() override {
 			if (isRunning)
 				return;
+			logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "suftp_recv.log", std::ios::app);
+			p_libsys_init();
 			isRunning = true;
 			int code = privateRun(interfaceToBindTo, portToBindTo, rootDirectory);
+			p_libsys_shutdown();
+			logfile.close();
 			isRunning = false;
 		}
+	private:
+		std::ofstream logfile;
 	protected:
 		bool isRunning;
 		int privateRun(std::string interfaceToBindTo, int portToBindTo, std::string rootDirectory) {
@@ -312,7 +318,7 @@ namespace suftp {
 			}
 
 			auto q = parseHeaders(headers);
-			std::cout << headers << std::endl;
+			logfile << headers << std::endl;
 			std::vector<Traversal> filesToReceive;
 			std::vector<Traversal> otherParsedHeaders;
 			for (auto& i : q) {
@@ -343,7 +349,7 @@ namespace suftp {
 			size_t totalPacketsReceived = 0;
 			size_t f = 0;
 			for (auto& currentFileInfo : filesToReceive) {
-				std::cout << "Receiving " << currentFileInfo["FPATH"] << std::endl;
+				logfile << "Receiving " << currentFileInfo["FPATH"] << std::endl;
 				std::string filename = rootDirectory + currentFileInfo["FPATH"];
 
 				int expectedPackets = stoi(currentFileInfo["FSIZE"]);
@@ -357,9 +363,9 @@ namespace suftp {
 						boost::filesystem::create_directories(fileAsPath.parent_path());
 					}
 					catch (boost::filesystem::filesystem_error e) {
-						cout << e.code() << endl;
-						cout << e.path1() << endl;
-						cout << e.what() << endl;
+						logfile << e.code() << endl;
+						logfile << e.path1() << endl;
+						logfile << e.what() << endl;
 					}
 				}
 
@@ -442,7 +448,7 @@ namespace suftp {
 		int portToBindTo;
 		std::string rootDirectory;
 
-	public slots:
+	signals:
 		void incrementFilesTransferred(int f);
 		void transferDone();
 		void transferFailed(int code);
@@ -467,20 +473,23 @@ namespace suftp {
 			this->portToBindTo = portToBindTo;
 			this->rootDirectory = rootDirectory;
 			this->filenames = filenames;
-			p_libsys_init();
 			isRunning = false;
 		}
 		~SUFTPSender_REMOTE() {
-			p_libsys_shutdown();
 		}
 		void run() override {
 			if (isRunning)
 				return;
+			logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "suftp_send_remote.log", std::ios::app);
+			p_libsys_init();
 			isRunning = true;
 			int code = privateRun(interfaceToBindTo, portToBindTo, rootDirectory, filenames);
+			p_libsys_shutdown();
+			logfile.close();
 			isRunning = false;
 		}
-
+	private:
+		std::ofstream logfile;
 	protected:
 		bool isRunning;
 		int privateRun(std::string interfaceToBindTo, int portToBindTo, std::string rootDirectory, std::vector<std::string> filenames) {
@@ -627,7 +636,7 @@ namespace suftp {
 					}
 					file.close();
 					emit incrementFilesTransferred(f);
-					std::cout << "sent" << std::endl;
+					logfile << "sent" << std::endl;
 				}
 
 				p_socket_send(sock, streamTermSig.c_str(), sizeof(streamTermSig.c_str()) + 1, NULL);
@@ -662,7 +671,7 @@ namespace suftp {
 		std::string rootDirectory;
 		std::vector<std::string> filenames;
 
-	public slots:
+	signals:
 		void incrementFilesTransferred(int f);
 		void transferDone();
 		void transferFailed(int code);
@@ -676,21 +685,24 @@ namespace suftp {
 			this->interfaceToBindTo = interfaceToBindTo;
 			this->portToBindTo = portToBindTo;
 			this->rootDirectory = rootDirectory;
-			p_libsys_init();
 			isRunning = false;
 		}
 		~SUFTPReceiver_REMOTE() {
-			p_libsys_shutdown();
 		}
 		
 		void run() override {
 			if (isRunning)
 				return;
+			logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "suftp_recv_remote.log", std::ios::app);
 			isRunning = true;
+			p_libsys_init();
 			int code = privateRun(interfaceToBindTo, portToBindTo, rootDirectory);
+			p_libsys_shutdown();
+			logfile.close();
 			isRunning = false;
 		}
-
+	private:
+		std::ofstream logfile;
 	protected:
 		bool isRunning;
 		int privateRun(std::string interfaceToBindTo, int portToBindTo, std::string rootDirectory) {
@@ -770,7 +782,7 @@ namespace suftp {
 				}
 
 				auto q = parseHeaders(headers);
-				std::cout << headers << std::endl;
+				logfile << headers << std::endl;
 				std::vector<Traversal> filesToReceive;
 
 				for (auto& i : q) {
@@ -810,9 +822,9 @@ namespace suftp {
 							boost::filesystem::create_directories(fileAsPath.parent_path());
 						}
 						catch (boost::filesystem::filesystem_error e) {
-							cout << e.code() << endl;
-							cout << e.path1() << endl;
-							cout << e.what() << endl;
+							logfile << e.code() << endl;
+							logfile << e.path1() << endl;
+							logfile << e.what() << endl;
 						}
 					}
 
@@ -896,7 +908,7 @@ namespace suftp {
 			int portToBindTo;
 			std::string rootDirectory;
 
-	public slots:
+	signals:
 		void incrementFilesTransferred(int f);
 		void transferDone();
 		void transferFailed(int code);

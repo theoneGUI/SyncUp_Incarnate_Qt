@@ -7,6 +7,7 @@
 #include <QDialog>
 #include "commons.h"
 #include <QSystemTrayIcon>
+#include "include/Matchmaker.h"
 
 #ifndef QT_NO_SYSTEMTRAYICON
 
@@ -29,7 +30,7 @@ private:
 
 private slots:
     void hashedFileCountIncrement(int);
-    void prepareProgressBar(int files);
+    void prepareProgressBar(int);
     void displayNumErrors(int);
     void onManualScan();
     void hashDirectory();
@@ -40,8 +41,16 @@ private slots:
     void selectAll();
     void unselectAll();
 
+    void startFileTransfer();
+    void incrementFilesTransferred(int);
+    void transferDone();
+    void transferFailed(int);
+
+    void beginSUFTP(address);
+    void matchFailed(int);
+
 protected:
-    void closeEvent(QCloseEvent* event) override;
+    void closeEvent(QCloseEvent*) override;
 
 private:
     QString scan;

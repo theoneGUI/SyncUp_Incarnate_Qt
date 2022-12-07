@@ -60,7 +60,7 @@
     <ExternalIncludePath>C:\Users\Aidan\Desktop\SyncUp-Incarnate\plibsys\out\install\x64-Release\include\plibsys;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>C:\Users\Aidan\Desktop\SyncUp-Incarnate\SyncUp_Incarnate\SUFTP-recv;C:\Users\Aidan\Desktop\SyncUp-Incarnate\plibsys\out\install\x64-Release\include\plibsys;C:\Users\Aidan\Desktop\SyncUp-Incarnate\SyncUp_Incarnate\SyncUp_Incarnate-Hasher;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Aidan\Desktop\SyncUp-Incarnate\plibsys\out\install\x64-Release\include\plibsys;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
@@ -104,6 +104,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="commons.cpp" />
+    <ClCompile Include="include\Matchmaker.cpp" />
     <ClCompile Include="include\SUFTP.cpp" />
     <ClCompile Include="include\Traversal.cpp" />
     <ClCompile Include="Worker.cpp" />
@@ -125,7 +126,9 @@
   <ItemGroup>
     <ClInclude Include="commons.h" />
     <ClInclude Include="Hasher.h" />
+    <ClInclude Include="include\DNSResolv.h" />
     <ClInclude Include="include\JSON.h" />
+    <QtMoc Include="include\Matchmaker.h" />
     <ClInclude Include="include\Pointer.h" />
     <ClInclude Include="include\sha256.h" />
     <QtMoc Include="include\SUFTP.h" />

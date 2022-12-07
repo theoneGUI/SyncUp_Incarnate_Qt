@@ -16,7 +16,9 @@
 #include <boost/filesystem.hpp>
 #include <QCloseEvent>
 #include <QSystemTrayIcon>
-
+#ifndef MATCHMAKER_H
+#include "include/Matchmaker.h"
+#endif
 using std::string;
 using std::ifstream;
 using std::ofstream;
@@ -40,6 +42,7 @@ GUI::GUI(QWidget *parent) : QMainWindow(parent)
     connect(ui.selectAllBtn, &QAbstractButton::released, this, &GUI::selectAll);
     connect(ui.unselectAllBtn, &QAbstractButton::released, this, &GUI::unselectAll);
 
+    connect(ui.transferBtn, &QAbstractButton::released, this, &GUI::startFileTransfer);
 
     this->setWindowIcon(theIcon);
     QString tmp;
@@ -53,6 +56,67 @@ GUI::GUI(QWidget *parent) : QMainWindow(parent)
         writeConfigFile(vectorOfPairs, configWriter::DEFAULT_PATH, configWriter::OVERWRITE);
     }
     refreshConfig();
+}
+
+void GUI::startFileTransfer() {
+    ui.transferBtn->setEnabled(false);
+    ui.manualScan->setEnabled(false);
+    ui.statusTxtLbl->setText("Waiting for receiver...");
+    Matchmaker* send = new Matchmaker(MM_SEND);
+    connect(send, &Matchmaker::matchFailed, this, &GUI::matchFailed);
+    connect(send, &Matchmaker::matchMade, this, &GUI::beginSUFTP);
+    connect(send, &Matchmaker::finished, send, &QObject::deleteLater);
+    send->start();
+}
+
+void GUI::beginSUFTP(address toSendTo) {
+    vector<string> changes;
+    for (auto& i : listWidgetItems) {
+        if (i->checkState() == Qt::Checked)
+            changes.push_back(scan.toStdString() + i->text().toStdString());
+    }
+    ui.progressBar->setMaximum(changes.size());
+
+    if (toSendTo.addrType == MM_IS_LOCAL) {
+        suftp::SUFTPSender* send = new suftp::SUFTPSender(toSendTo.ipv4, SERVER_PORT, scan.toStdString(), changes);
+        connect(send, &suftp::SUFTPSender::transferFailed, this, &GUI::transferFailed);
+        connect(send, &suftp::SUFTPSender::transferDone, this, &GUI::transferDone);
+        connect(send, &suftp::SUFTPSender::incrementFilesTransferred, this, &GUI::incrementFilesTransferred);
+        connect(send, &suftp::SUFTPSender::finished, send, &QObject::deleteLater);
+        send->start();
+    }
+    else if (toSendTo.addrType == MM_IS_REMOTE) {
+        suftp::SUFTPSender_REMOTE* send = new suftp::SUFTPSender_REMOTE(toSendTo.ipv4, SERVER_PORT, scan.toStdString(), changes);
+        connect(send, &suftp::SUFTPSender_REMOTE::transferFailed, this, &GUI::transferFailed);
+        connect(send, &suftp::SUFTPSender_REMOTE::transferDone, this, &GUI::transferDone);
+        connect(send, &suftp::SUFTPSender_REMOTE::incrementFilesTransferred, this, &GUI::incrementFilesTransferred);
+        connect(send, &suftp::SUFTPSender::finished, send, &QObject::deleteLater);
+        send->start();
+    }
+}
+
+void GUI::matchFailed(int code) {
+    QString qcode = std::to_string(code).c_str();
+    QMessageBox::critical(this, tr("Matchmaking failed"), tr("Matchmaking failed with code ") + qcode);
+    ui.manualScan->setEnabled(true);
+}
+
+void GUI::incrementFilesTransferred(int f) {
+    if (ui.statusTxtLbl->text() != "Transferring...")
+        ui.statusTxtLbl->setText("Transferring...");
+    ui.progressBar->setValue(f);
+}
+void GUI::transferDone() {
+    QMessageBox::information(this, tr("Transfer complete"), tr("Transferred all your files successfully"));
+    ui.manualScan->setEnabled(true);
+    ui.progressBar->setValue(0);
+    ui.statusTxtLbl->setText("Done");
+}
+void GUI::transferFailed(int code) {
+    QString qcode = std::to_string(code).c_str();
+    QMessageBox::critical(this, tr("Transfer failed"), tr("Transfer failed with code ")+qcode);
+    ui.manualScan->setEnabled(true);
+    ui.manualScan->setEnabled(true);
 }
 
 void GUI::onManualScan() {
@@ -136,7 +200,6 @@ void GUI::updateView(std::vector<std::string> results)
     for (auto& i : results) {
         std::regex basedir_re(scan.toStdString());
         string tmp = std::regex_replace(i, basedir_re, "");
-        //auto& tmp = i;
 
         QListWidgetItem* tmpItem = new QListWidgetItem(tr(tmp.c_str()), ui.listWidget);
         tmpItem->setCheckState(Qt::Checked);
@@ -146,6 +209,9 @@ void GUI::updateView(std::vector<std::string> results)
     QString msg = "We found " + number + " changed files.";
     QMessageBox::information(this, tr("Success"), msg, QMessageBox::Ok);
     ui.manualScan->setEnabled(true);
+
+    if (results.size() > 0)
+        ui.transferBtn->setEnabled(true);
 }
 
 void GUI::refreshConfig() {

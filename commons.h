@@ -22,6 +22,8 @@ namespace paths {
     const std::string TMP = get_env_var("TMP");
     const std::string USERPROFILE = get_env_var("USERPROFILE");
     const std::string APPDATA = get_env_var("APPDATA");
+    const std::string SYNCUP_DATA_DIR = APPDATA + "/SyncUp/";
+    const std::string SYNCUP_INSTALL_DIR = get_env_var("PROGRAMFILES") + "/SyncUp/";
 }
 
 Traversal readConfigFile(std::string path);
