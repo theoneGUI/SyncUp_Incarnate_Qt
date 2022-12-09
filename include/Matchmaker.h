@@ -44,6 +44,8 @@ typedef int mm_role;
 #include <QThread>
 #include <QObject>
 #include "../commons.h"
+#include <chrono>
+#include <ctime>
 
 #define MAX_MESSAGE_LENGTH 8192
 #define SERVER_PORT 4444
@@ -82,12 +84,16 @@ public:
 	void run() override {
 		p_libsys_init();
 		logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "mm.log", std::ios::app);
+		auto now = std::chrono::system_clock::now();
+		auto formatted = std::chrono::system_clock::to_time_t(now);
+		logfile << "\n\nNew log beginning - " << std::ctime(&formatted) << endl;
 		address failaddr = address{ "failed", 1 };
 		if (isRunning)
 			emit matchFailed(19);
 		isRunning = true;
 		address code = privateRun();
 		isRunning = false;
+		logfile << "Match made: \n" << "IPv4: " << code.ipv4 << "\nAddress type: " << (code.addrType == MM_IS_REMOTE ? "REMOTE" : "LOCAL") << endl;
 		p_libsys_shutdown();
 		logfile.close();
 		emit matchMade(code);
@@ -104,7 +110,7 @@ private:
 		auto dns = resolver.resolve(MM_ADDRESS);
 		size_t index = dns.size() - 1;
 		auto resolved = dns[index].c_str();
-
+		bool failed = false;
 		if ((addr = p_socket_address_new(resolved, MM_PORT)) == NULL)
 			emit matchFailed(1);
 
@@ -124,10 +130,16 @@ private:
 			p_socket_free(sock);
 			emit matchFailed(4);
 		}
+		
+		if (failed)
+		{
+			logfile << "Failed to connect to matchmaking service\n";
+			return address{ "failed", 1 };
+		}
+		logfile << "Connected to matchmaking service successfully" << endl;
 
 		std::string sendHeaders = suftp::headStrtSig;
 		char garbage[4]{};
-
 		std::vector<std::pair<std::string, std::string>> otherHeaders;
 		otherHeaders.push_back(std::pair<std::string, std::string>("USERID", "PREALPHA_stuff"));
 		otherHeaders.push_back(std::pair<std::string, std::string>("PUBLICIP ", getPublicIP().c_str()));
@@ -218,6 +230,7 @@ private:
 		delete[] raw;
 		p_socket_address_free(addr);
 		p_socket_close(sock, NULL);
+		logfile << "Match made successfully, contintuing onto SUFTP" << endl;
 		return address{ addrToUse, 0, useRemote };
 	}
 	std::vector<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>> parseHeaders(std::string headers) {

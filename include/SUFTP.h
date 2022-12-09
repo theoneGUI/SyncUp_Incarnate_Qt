@@ -19,6 +19,8 @@
 #include <utility>
 #include "../commons.h"
 #include <QThread>
+#include <ctime>
+#include <chrono>
 
 #define MAX_MESSAGE_LENGTH 8192
 #define SERVER_PORT 4444
@@ -483,6 +485,9 @@ namespace suftp {
 			logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "suftp_send_remote.log", std::ios::app);
 			p_libsys_init();
 			isRunning = true;
+			auto now = std::chrono::system_clock::now();
+			auto formatted = std::chrono::system_clock::to_time_t(now);
+			logfile << "\n\nNew log beginning - " << std::ctime(&formatted) << endl;
 			int code = privateRun(interfaceToBindTo, portToBindTo, rootDirectory, filenames);
 			p_libsys_shutdown();
 			logfile.close();
@@ -496,16 +501,23 @@ namespace suftp {
 			PSocketAddress* addr;
 			PSocket* sock;
 
+
+			bool failed = false;
 			// Construct address for server.  Since the server is assumed to be on the same machine for the sake of this program, the address is loopback, but typically this would be an external address.
 			if ((addr = p_socket_address_new(interfaceToBindTo.c_str(), portToBindTo)) == NULL)
+			{
+				failed = true;
+				logfile << "Failed to transfer with code " << 1 << endl;
 				emit transferFailed(1);
+			}
 
 			// Create socket
 			if ((sock = p_socket_new(P_SOCKET_FAMILY_INET, P_SOCKET_TYPE_STREAM, P_SOCKET_PROTOCOL_TCP, NULL)) == NULL)
 			{
 				// Can't construct socket, cleanup and exit.
 				p_socket_address_free(addr);
-
+				failed = true;
+				logfile << "Failed to transfer with code " << 2 << endl;
 				emit transferFailed(2);
 			}
 			// Connect to server.
@@ -514,7 +526,14 @@ namespace suftp {
 				// Couldn't connect, cleanup.
 				p_socket_address_free(addr);
 				p_socket_free(sock);
+				failed = true;
+				logfile << "Failed to transfer with code " << 4 << endl;
 				emit transferFailed(4);
+			}
+
+			if (failed)
+			{
+				return -1;
 			}
 
 			char* raw = new char[(MAX_MESSAGE_LENGTH + 2)];
@@ -547,12 +566,13 @@ namespace suftp {
 			//	}
 			//	headerBuffer[i % MAX_MESSAGE_LENGTH] = headers[i];
 			//}
-			////p_socket_send(sock, headTermSig.c_str(), sizeof(headTermSig) + 1, NULL);
+			//p_socket_send(sock, headTermSig.c_str(), sizeof(headTermSig) + 1, NULL);
 
+			logfile << "Waiting for goahead from relay\n";
 			p_socket_receive(sock, headerBuffer, MAX_MESSAGE_LENGTH, NULL);
-
+			logfile << "Continuing with normal SUFTP\n";
 			{
-				// Continue with normal SUFTP protocol
+				// Continue with normal SUFTP protocol but with packet numbering
 
 				std::ifstream file;
 				std::string headers;
@@ -608,7 +628,7 @@ namespace suftp {
 					headerBuffer[i % MAX_MESSAGE_LENGTH] = headers[i];
 				}
 				p_socket_send(sock, headTermSig.c_str(), sizeof(headTermSig) + 1, NULL);
-				p_socket_receive(sock, garbage, sizeof(garbage), NULL);
+				//p_socket_receive(sock, garbage, sizeof(garbage), NULL);
 
 				// block until recipient is ready for the files themselves
 				p_socket_receive(sock, garbage, sizeof(garbage), NULL);
