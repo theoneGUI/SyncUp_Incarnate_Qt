@@ -103,10 +103,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="commons.cpp" />
+    <ClCompile Include="..\commons\commons.cpp" />
+    <ClCompile Include="..\commons\MetaFileSystem.cpp" />
     <ClCompile Include="include\Matchmaker.cpp" />
     <ClCompile Include="include\SUFTP.cpp" />
-    <ClCompile Include="include\Traversal.cpp" />
     <ClCompile Include="Worker.cpp" />
     <QtRcc Include="GUI.qrc" />
     <QtUic Include="DialogButtonRight.ui" />
@@ -124,7 +124,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="commons.h" />
+    <ClInclude Include="..\commons\commons.h" />
+    <ClInclude Include="..\commons\MetaFileSystem.h" />
     <ClInclude Include="Hasher.h" />
     <ClInclude Include="include\DNSResolv.h" />
     <ClInclude Include="include\JSON.h" />
@@ -132,7 +133,6 @@
     <ClInclude Include="include\Pointer.h" />
     <ClInclude Include="include\sha256.h" />
     <QtMoc Include="include\SUFTP.h" />
-    <ClInclude Include="include\Traversal.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="Settings.h" />
     <ClInclude Include="Types.h" />

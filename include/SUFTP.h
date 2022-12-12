@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <regex>
-#include "Traversal.h"
+#include "../../../../commons/Traversal.h"
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <array>
@@ -17,10 +17,12 @@
 #include <memory>
 #include <stdexcept>
 #include <utility>
-#include "../commons.h"
+#include "../../../../commons/commons.h"
+#include "../../../../commons/MetaFileSystem.h"
 #include <QThread>
 #include <ctime>
 #include <chrono>
+#include <iomanip>
 
 #define MAX_MESSAGE_LENGTH 8192
 #define SERVER_PORT 4444
@@ -29,25 +31,6 @@ using std::pair;
 using std::endl;
 
 namespace suftp {
-
-	const char alpha[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-	const std::string fileTermSig = "<%SU+TERM+FILE%>";
-	const std::string fileStrtSig = "<%SU+STRT+FILE%>";
-
-	const std::string headStrtSig = "<%SU+STRT+HEAD%>";
-	const std::string headTermSig = "<%SU+TERM+HEAD%>";
-
-	const std::string streamTermSig = "<%SU+TERM+STREAM%>";
-	const std::string streamStrtSig = "<%SU+STRT+STREAM%>";
-
-	const std::string headFileStrt = "%FILE\n";
-	const std::string headFileTerm = "%ENDFILE\n";
-
-	const std::string headAssociativeOperator{ ":" };
-	const std::string headValArgAssociativeOp{ "=" };
-	const std::string headerTitleStrt{ "&" };
-	const std::string headerBlockSeparator{ "\n\n" };
 
 	std::string exec(const char* cmd);
 
@@ -501,7 +484,6 @@ namespace suftp {
 			PSocketAddress* addr;
 			PSocket* sock;
 
-
 			bool failed = false;
 			// Construct address for server.  Since the server is assumed to be on the same machine for the sake of this program, the address is loopback, but typically this would be an external address.
 			if ((addr = p_socket_address_new(interfaceToBindTo.c_str(), portToBindTo)) == NULL)
@@ -535,6 +517,9 @@ namespace suftp {
 			{
 				return -1;
 			}
+
+			const int MAX_CONTENT_LENGTH = (MAX_MESSAGE_LENGTH)-((MetaFileSystem::maxHexLen * 2) + 2);
+			const int CONTENT_OFFSET = (MetaFileSystem::maxHexLen * 2) + 2 + 1;
 
 			char* raw = new char[(MAX_MESSAGE_LENGTH + 2)];
 			std::string headers;
@@ -628,20 +613,26 @@ namespace suftp {
 					headerBuffer[i % MAX_MESSAGE_LENGTH] = headers[i];
 				}
 				p_socket_send(sock, headTermSig.c_str(), sizeof(headTermSig) + 1, NULL);
-				//p_socket_receive(sock, garbage, sizeof(garbage), NULL);
 
 				// block until recipient is ready for the files themselves
 				p_socket_receive(sock, garbage, sizeof(garbage), NULL);
 
-				size_t f = 0;
+				size_t packetNum = 0;
+				size_t fileNum = 0;
 
 				for (auto& filename : filenames) {
+					fileNum++;
 					if (filename == "")
 						continue;
 					file.open(filename, std::ios::binary);
 					while (!file.eof()) {
+						packetNum++;
+						std::string packetHeader(MetaFileSystem::toHex(fileNum) + " " + MetaFileSystem::toHex(packetNum) + " ");
+						for (int j = 0; j < packetHeader.size(); j++) {
+							buffer[j] = packetHeader[j];
+						}
 						int i = 0;
-						for (i = 0; (file.good() && i < MAX_MESSAGE_LENGTH); i++) {
+						for (i = CONTENT_OFFSET; (file.good() && i < MAX_CONTENT_LENGTH); i++) {
 							buffer[i] = file.get();
 							if (i != MAX_MESSAGE_LENGTH - 1)
 								buffer[i + 1] = 0;
@@ -650,13 +641,13 @@ namespace suftp {
 						if (sock != NULL)
 						{
 							p_socket_send(sock, buffer, MAX_MESSAGE_LENGTH, NULL);
+							p_socket_receive(sock, garbage, 4, NULL);
 						}
 						else
 							printf("Can't make con, tried and failed...\n");
 					}
 					file.close();
-					emit incrementFilesTransferred(f);
-					logfile << "sent" << std::endl;
+					emit incrementFilesTransferred(fileNum);
 				}
 
 				p_socket_send(sock, streamTermSig.c_str(), sizeof(streamTermSig.c_str()) + 1, NULL);

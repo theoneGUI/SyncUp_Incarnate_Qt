@@ -279,8 +279,8 @@ namespace suon {
 
 		pair<std::string, pair<std::string, std::string>> result;
 
-		while (low<=high) {
-			int middle = (low + high) / 2;
+		while (low<high) {
+			int middle = ((low + high) / 2);
 			auto atMiddle = indexedResults[middle].pointsTo();
 			if (indexHash == atMiddle) {
 				if (indexedResults[middle].is().second.second == hashd)

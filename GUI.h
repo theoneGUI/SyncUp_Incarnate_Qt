@@ -5,7 +5,7 @@
 #include "Settings.h"
 #include <QString>
 #include <QDialog>
-#include "commons.h"
+#include "../../../../commons/commons.h"
 #include <QSystemTrayIcon>
 #include "include/Matchmaker.h"
 

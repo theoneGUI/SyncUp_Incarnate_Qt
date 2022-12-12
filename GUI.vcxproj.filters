@@ -52,16 +52,16 @@
     <ClCompile Include="Worker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\Traversal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="commons.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="include\SUFTP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\Matchmaker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\commons\commons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\commons\MetaFileSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -81,16 +81,16 @@
     <ClInclude Include="include\sha256.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Traversal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Types.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="commons.h">
+    <ClInclude Include="include\DNSResolv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\DNSResolv.h">
+    <ClInclude Include="..\commons\commons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\commons\MetaFileSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

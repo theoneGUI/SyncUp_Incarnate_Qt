@@ -10,8 +10,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <string>
-#include "include/Traversal.h"
-#include "commons.h"
+#include "../../../../commons/Traversal.h"
+#include "../../../../commons/commons.h"
 
 
 namespace ui

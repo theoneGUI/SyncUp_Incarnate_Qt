@@ -59,8 +59,8 @@ GUI::GUI(QWidget *parent) : QMainWindow(parent)
 }
 
 void GUI::startFileTransfer() {
-    ui.transferBtn->setEnabled(false);
-    ui.manualScan->setEnabled(false);
+    //ui.transferBtn->setEnabled(false);
+    //ui.manualScan->setEnabled(false);
     ui.statusTxtLbl->setText("Waiting for receiver...");
     Matchmaker* send = new Matchmaker(MM_SEND);
     connect(send, &Matchmaker::matchFailed, this, &GUI::matchFailed);

@@ -30,7 +30,7 @@ typedef int mm_role;
 #include <vector>
 #include <iostream>
 #include <regex>
-#include "Traversal.h"
+#include "../../../../commons/Traversal.h"
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <array>
@@ -43,7 +43,7 @@ typedef int mm_role;
 #include <utility>
 #include <QThread>
 #include <QObject>
-#include "../commons.h"
+#include "../../../../commons/commons.h"
 #include <chrono>
 #include <ctime>
 
