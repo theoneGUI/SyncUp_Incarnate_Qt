@@ -3,7 +3,7 @@
 
 #ifndef MATCHMAKER_H
 #define MATCHMAKER_H
-
+#define PRERELEASE
 
 #ifdef PRERELEASE
 #define MM_ADDRESS "localhost"
@@ -37,7 +37,7 @@ typedef int mm_role;
 #include <cstdio>
 #include <memory>
 #include <stdexcept>
-#include "SUFTP.h"
+#include "../../commons/SUFTP.h"
 #include "DNSResolv.h"
 #include "../../curl-7.70.0/include/curl/curl.h"
 #include <utility>

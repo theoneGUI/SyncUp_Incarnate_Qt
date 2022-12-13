@@ -1,3 +1,5 @@
+#define SU_GUI
+
 #include "GUI.h"
 #include <QtWidgets/QApplication>
 

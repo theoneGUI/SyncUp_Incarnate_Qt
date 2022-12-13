@@ -1,8 +1,9 @@
 #define TESTING
+#define SU_GUI
 
 #include "GUI.h"
 #include "Hasher.h"
-#include "include/SUFTP.h"
+#include "../commons/SUFTP.h"
 #include <fstream>
 #include <string>
 #include <stdlib.h>
@@ -59,14 +60,18 @@ GUI::GUI(QWidget *parent) : QMainWindow(parent)
 }
 
 void GUI::startFileTransfer() {
-    //ui.transferBtn->setEnabled(false);
-    //ui.manualScan->setEnabled(false);
+    ui.transferBtn->setEnabled(false);
+    ui.manualScan->setEnabled(false);
     ui.statusTxtLbl->setText("Waiting for receiver...");
     Matchmaker* send = new Matchmaker(MM_SEND);
     connect(send, &Matchmaker::matchFailed, this, &GUI::matchFailed);
     connect(send, &Matchmaker::matchMade, this, &GUI::beginSUFTP);
     connect(send, &Matchmaker::finished, send, &QObject::deleteLater);
     send->start();
+}
+
+void GUI::SUFTPstatus(const char* msg) {
+    ui.statusTxtLbl->setText(tr(msg));
 }
 
 void GUI::beginSUFTP(address toSendTo) {
@@ -83,6 +88,7 @@ void GUI::beginSUFTP(address toSendTo) {
         connect(send, &suftp::SUFTPSender::transferDone, this, &GUI::transferDone);
         connect(send, &suftp::SUFTPSender::incrementFilesTransferred, this, &GUI::incrementFilesTransferred);
         connect(send, &suftp::SUFTPSender::finished, send, &QObject::deleteLater);
+        connect(send, &suftp::SUFTPSender::SUFTPstatus, this, &GUI::SUFTPstatus);
         send->start();
     }
     else if (toSendTo.addrType == MM_IS_REMOTE) {

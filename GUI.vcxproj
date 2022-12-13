@@ -60,7 +60,7 @@
     <ExternalIncludePath>C:\Users\Aidan\Desktop\SyncUp-Incarnate\plibsys\out\install\x64-Release\include\plibsys;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <IncludePath>C:\Users\Aidan\Desktop\SyncUp-Incarnate\plibsys\out\install\x64-Release\include\plibsys;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Aidan\Desktop\SyncUp-Incarnate\plibsys\out\install\x64-Release\include\plibsys;C:\Users\Aidan\Desktop\SyncUp-Incarnate\GUI\include\activeH;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
@@ -105,8 +105,8 @@
   <ItemGroup>
     <ClCompile Include="..\commons\commons.cpp" />
     <ClCompile Include="..\commons\MetaFileSystem.cpp" />
+    <ClCompile Include="..\commons\SUFTP.cpp" />
     <ClCompile Include="include\Matchmaker.cpp" />
-    <ClCompile Include="include\SUFTP.cpp" />
     <ClCompile Include="Worker.cpp" />
     <QtRcc Include="GUI.qrc" />
     <QtUic Include="DialogButtonRight.ui" />
@@ -126,13 +126,13 @@
   <ItemGroup>
     <ClInclude Include="..\commons\commons.h" />
     <ClInclude Include="..\commons\MetaFileSystem.h" />
+    <QtMoc Include="..\commons\SUFTP.h" />
     <ClInclude Include="Hasher.h" />
     <ClInclude Include="include\DNSResolv.h" />
     <ClInclude Include="include\JSON.h" />
     <QtMoc Include="include\Matchmaker.h" />
     <ClInclude Include="include\Pointer.h" />
     <ClInclude Include="include\sha256.h" />
-    <QtMoc Include="include\SUFTP.h" />
     <ClInclude Include="resource.h" />
     <QtMoc Include="Settings.h" />
     <ClInclude Include="Types.h" />

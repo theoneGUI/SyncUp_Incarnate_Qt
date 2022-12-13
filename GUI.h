@@ -49,6 +49,8 @@ private slots:
     void beginSUFTP(address);
     void matchFailed(int);
 
+    void SUFTPstatus(const char*);
+
 protected:
     void closeEvent(QCloseEvent*) override;
 

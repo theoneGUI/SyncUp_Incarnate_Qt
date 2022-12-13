@@ -52,9 +52,6 @@
     <ClCompile Include="Worker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\SUFTP.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="include\Matchmaker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,6 +60,9 @@
     </ClCompile>
     <ClCompile Include="..\commons\MetaFileSystem.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\commons\SUFTP.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -111,10 +111,10 @@
     <QtMoc Include="Settings.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="include\SUFTP.h">
+    <QtMoc Include="include\Matchmaker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="include\Matchmaker.h">
+    <QtMoc Include="..\commons\SUFTP.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
