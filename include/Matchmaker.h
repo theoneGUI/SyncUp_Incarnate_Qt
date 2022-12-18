@@ -70,7 +70,7 @@ struct address {
 	int addrType = MM_IS_UNDEFINED;
 };
 
-class Matchmaker : public QThread
+class Matchmaker : public QThread, public suftp::plib_user
 {
 	Q_OBJECT
 public:
@@ -78,11 +78,8 @@ public:
 		isRunning = false;
 		this->role = role;
 	}
-	~Matchmaker() {
-		p_libsys_shutdown();
-	}
+
 	void run() override {
-		p_libsys_init();
 		logfile = std::ofstream(paths::SYNCUP_DATA_DIR + "mm.log", std::ios::app);
 		auto now = std::chrono::system_clock::now();
 		auto formatted = std::chrono::system_clock::to_time_t(now);
@@ -94,7 +91,6 @@ public:
 		address code = privateRun();
 		isRunning = false;
 		logfile << "Match made: \n" << "IPv4: " << code.ipv4 << "\nAddress type: " << (code.addrType == MM_IS_REMOTE ? "REMOTE" : "LOCAL") << endl;
-		p_libsys_shutdown();
 		logfile.close();
 		emit matchMade(code);
 	}
