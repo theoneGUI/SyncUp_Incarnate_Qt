@@ -11,10 +11,6 @@
 #include <filesystem>
 #include <system_error>
 
-struct HSF_NF;
-
-struct HD_NF;
-
 class Hasher {
 public:
 	Hasher(std::string& directoryPath, std::string& hashStorageFile);
@@ -33,7 +29,7 @@ private:
 
 	void hashSingleFile(const std::string& fp);
 	suon::SUON hashDirectory(const std::string& dp);
-	int numChanges;
+	size_t numChanges;
 };
 
 

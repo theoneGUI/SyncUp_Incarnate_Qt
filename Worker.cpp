@@ -1,4 +1,5 @@
 #include "Worker.h"
+
 using namespace std;
 
 WorkerThread::WorkerThread(string& directoryPath, string& hashStorageFile) : accumulator(suon::SUON(suon::storType::ASSOC)), dirToHash{ directoryPath }, hashFile{ hashStorageFile } {
@@ -45,10 +46,14 @@ vector<string> WorkerThread::privateRun(const bool& dumpToFile) {
 	suon::SUON currentHashes = hashDirectory(dirToHash);
 	vector<string> changes;
 
+	ofstream logfile = ofstream("C:/Users/Aidan/Desktop/log.log", std::ios::app);
+
 	try {
-		suon::SUON test(suon::storType::LIST);
+		suon::SUON test(suon::storType::ASSOC);
 		test.loadFromFile(hashFile);
+
 		for (pair<string, pair<string, string>> i; currentHashes.hasNext(); i = currentHashes.next()) {
+			logfile << i.first << "\t" << i.second.second << "\n";
 			string hashAgainst = test[i.first];
 			if (i.second.second != hashAgainst) {
 				if (i.first == "")
@@ -63,7 +68,8 @@ vector<string> WorkerThread::privateRun(const bool& dumpToFile) {
 			}
 		}*/
 
-		numChanges = changes.size() - 10;
+		numChanges = changes.size();
+#
 		if (dumpToFile)
 			currentHashes.dumpToFile(hashFile);
 	}
@@ -133,8 +139,9 @@ suon::SUON WorkerThread::hashDirectory(const string& dp) {
 void WorkerThread::hashSingleFile(const string& fp) {
 	ifstream reader(fp);
 	SHA256 hasher;
+	char content;
 	while (reader.good()) {
-		char content = reader.get();
+		content = reader.get();
 		hasher.add(&content, sizeof(content));
 	}
 	string hash = hasher.getHash();

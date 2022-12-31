@@ -57,7 +57,7 @@ vector<string> Hasher::privateRun(const bool& dumpToFile) {
 			}
 		}*/
 
-		numChanges = changes.size() - 10;
+		numChanges = changes.size();
 		if (dumpToFile)
 			currentHashes.dumpToFile(hashFile);
 	}

@@ -13,7 +13,7 @@ namespace suon {
 		ASSOC,
 		LIST
 	};
-	
+
 	const std::string nfound = "&SUON_NF&";
 	const std::string objEmpty = "&SUON_EMPTY&";
 
@@ -29,7 +29,7 @@ namespace suon {
 		std::string getJson();
 		storType getStorageMethod();
 		std::vector<Pointer> getIndexed() { return indexedResults; };
-		std::string operator[](std::string );
+		std::string operator[](std::string);
 		auto next();
 		bool hasNext() { return !((iteratorIndex + 1) == iteratorMaxIndex); }
 		void resetIterator() { iteratorIndex = 0; };
@@ -50,7 +50,7 @@ namespace suon {
 #endif
 	private:
 		void beginList() { runningString = "["; }
-		void endList() { if (runningString[runningString.size()-1] != ']') runningString += "]"; }
+		void endList() { if (runningString[runningString.size() - 1] != ']') runningString += "]"; }
 		void delimit();
 		void indexRapidAccess();
 		long long unsigned stringToIntHash(std::string&);
@@ -89,7 +89,7 @@ namespace suon {
 			runningString += "{\"" + addTo.first + "\":\"" + addTo.second + "\"}";
 		}
 		else {
-			runningString += "\"" +  addTo.first + "\":{\"" + addTo.first + "\":\"" + addTo.second + "\"}";
+			runningString += "\"" + addTo.first + "\":{\"" + addTo.first + "\":\"" + addTo.second + "\"}";
 		}
 		optimized = false;
 		objectVectorIsUpToDate = false;
@@ -125,7 +125,7 @@ namespace suon {
 	inline void SUON::indexRapidAccess()
 	{
 		long long unsigned hash;
-		
+
 #ifdef PRERELEASE
 		std::cout << "hashing all entries" << std::endl;
 #endif
@@ -154,8 +154,8 @@ namespace suon {
 		long long unsigned hash;
 		hash = len;
 		for (int i = 0; i < len; i++) {
-			hash += ((in.at(i) % ((hash-1) * (in.at(i)+1))) *((hash + 1) / 2) % (hash + len + i));
-			hash += (hash - (in.at(i)))/2;
+			hash += ((in.at(i) % ((hash - 1) * (in.at(i) + 1))) * ((hash + 1) / 2) % (hash + len + i));
+			hash += (hash - (in.at(i))) / 2;
 		}
 		return hash;
 	}
@@ -261,7 +261,7 @@ namespace suon {
 
 		convertToObjects();
 	}
-	
+
 	inline std::string SUON::operator[](std::string hashd)
 	{
 		if (!objectVectorIsUpToDate)
@@ -274,12 +274,12 @@ namespace suon {
 
 		size_t indexedLen = indexedResults.size();
 		int low = 0;
-		int high = indexedLen;
+		int high = indexedLen-1;
 
 
 		pair<std::string, pair<std::string, std::string>> result;
 
-		while (low<high) {
+		while (low <= high) {
 			int middle = ((low + high) / 2);
 			auto atMiddle = indexedResults[middle].pointsTo();
 			if (indexHash == atMiddle) {
@@ -292,7 +292,7 @@ namespace suon {
 					tmp--;
 				}
 				tmp = middle;
-				while (middle != indexedLen-1 && indexedResults[tmp + 1].pointsTo() == indexedResults[tmp].pointsTo()) { // in the event of a collision (forwards)
+				while (middle != indexedLen - 1 && indexedResults[tmp + 1].pointsTo() == indexedResults[tmp].pointsTo()) { // in the event of a collision (forwards)
 					if (indexedResults[tmp].is().second.second == hashd)
 						return indexedResults[tmp].is().second.second;
 					tmp++;
@@ -320,7 +320,7 @@ namespace suon {
 			return pair<std::string, pair<std::string, std::string>>();
 		return indexedResults.at(iteratorIndex - 1).is();
 	}
-	
+
 }
 
 

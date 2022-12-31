@@ -12,6 +12,7 @@
 #include <boost/filesystem.hpp>
 #include <system_error>
 
+#define PRERELEASE
 
 class WorkerThread : public QThread
 {
@@ -40,10 +41,9 @@ private:
 public:
 	void run() override {
 		privateRun(
-#ifdef TESTING
+#ifdef PRERELEASE
 			false
-#endif
-#ifndef TESTING
+#else
 			true
 #endif
 		);
